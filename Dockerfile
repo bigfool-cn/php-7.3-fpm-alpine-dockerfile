@@ -17,9 +17,22 @@ RUN set -xe \
 # 安装phpize依赖
 RUN apk add --no-cache --update --virtual .phpize-deps $PHPIZE_DEPS
 
-# 安装gd扩展
+# 安装扩展
+RUN docker-php-ext-install pdo_mysql \
+    opcache \
+    sockets \
+    pcntl 
+
+# 安装event扩展
 RUN set -xe \
-  && apk add --no-cache libpng-dev freetype-dev libjpeg-turbo-dev \
+    && apk add --no-cache --update libevent-dev openssl-dev \
+    && pecl install event \
+    && docker-php-ext-enable --ini-name zz-event.ini event
+
+# 安装gd扩展
+ENV GD_DEPS libpng-dev freetype-dev libjpeg-turbo-dev
+RUN set -xe \
+  && apk add --no-cache --update --virtual .gd_deps $GD_DEPS \
   && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ --with-png-dir=/usr/include/  \
   && docker-php-ext-install -j$(nproc) gd
 
@@ -41,4 +54,5 @@ RUN pecl install redis-5.0.0 \
 # 删除phpize依赖 减少镜像体积
 RUN apk del .phpize-deps
 
-
+RUN rm -rf /tmp/* \
+    && rm -rf /var/cache/apk/*
