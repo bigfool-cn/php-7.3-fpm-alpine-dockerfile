@@ -5,14 +5,14 @@ MAINTAINER bigfool <1063944784@qq.com>
 # 替换apk源
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 
-# 安装composer
+# 安装composer https://packagist.phpcomposer.com
 RUN set -xe \
   && php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
   && php composer-setup.php \
   && php -r "unlink('composer-setup.php');" \
   && mv composer.phar /usr/local/bin/composer \
   && composer self-update \
-  && composer config -g repo.packagist composer https://packagist.phpcomposer.com
+  && composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/
 
 # 安装phpize依赖
 RUN apk add --no-cache --update --virtual .phpize-deps $PHPIZE_DEPS
